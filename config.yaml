@@ -1,0 +1,23 @@
+postgres:
+  host: "192.168.100.118"
+  port: 5432
+  user: "postgres"
+  password: "Zstvgcs@91022"
+  dbname: "deepface_v5"
+  showSQL: true
+  showtime: true
+  connMaxLifetime: 1000
+  maxOpenConns: 10
+  maxIdleConns: 1000
+  tables: ["faces","faces_index","nonmotor_capture","nonmotor_capture_index","pedestrian_capture","pedestrian_capture_index","vehicle_capture","vehicle_capture_index"]
+#  tables: ["nonmotor_capture"]
+deletetime:
+  # 删除开始时间，一般不需要修改
+  startTime: "2006-01-02 15:04:05"
+  endTime: "2020-03-12 18:00:00"
+garbage:
+  URL: "192.168.100.118:9333"
+  garbageThreshold: 0.2
+log:
+  # 4为info级别 5为debug级别
+  level: 5

@@ -91,7 +91,7 @@ func DeleteUrlFromWeed(urls []string, flag chan bool) {
 		if err != nil {
 			fmt.Println(err)
 		}
-		//log.WithFields(log.Fields{}).Info(url)
+		//log.WithFields(log.Fields{}).Debug(url)
 	}
 	flag <- true
 }

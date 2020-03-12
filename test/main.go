@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"strings"
 	"time"
 )
@@ -29,7 +30,7 @@ func urlTest() {
 
 func timeParse() {
 	strT1 := "2020-03-12 08:00:00"
-	parse, err := time.ParseInLocation("2006-01-02 15:04:05", strT1,time.Local)
+	parse, err := time.ParseInLocation("2006-01-02 15:04:05", strT1, time.Local)
 	if err != nil {
 
 	}
@@ -37,5 +38,8 @@ func timeParse() {
 }
 
 func main() {
-	timeParse()
+	s := log.Level(5)
+	log.SetLevel(log.DebugLevel)
+	fmt.Printf("%T\n", log.DebugLevel)
+	fmt.Println(s)
 }

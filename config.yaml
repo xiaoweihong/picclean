@@ -14,10 +14,11 @@ postgres:
 deletetime:
   # 删除开始时间，一般不需要修改
   startTime: "2006-01-02 15:04:05"
-  endTime: "2020-03-12 18:00:00"
+  endTime: "2020-03-12 19:00:00"
 garbage:
   URL: "192.168.100.118:9333"
   garbageThreshold: 0.2
+  deleteDB: true
 log:
-  # 4为info级别 5为debug级别
-  level: 5
+  # false为info级别 true为debug级别
+  debug: true

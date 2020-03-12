@@ -10,7 +10,6 @@ import (
 	"picclean/config"
 	"picclean/contorller"
 	"picclean/db"
-	"picclean/utils"
 	"sync"
 	"time"
 )
@@ -19,7 +18,6 @@ var (
 	engine *xorm.Engine
 	wg     *sync.WaitGroup
 )
-
 
 func init() {
 	log.SetReportCaller(false)
@@ -32,27 +30,37 @@ func init() {
 	// 设置将日志输出到标准输出（默认的输出为stderr，标准错误）
 	// 日志消息输出可以是任意的io.writer类型
 	log.SetOutput(os.Stdout)
-
-	// 设置日志级别
-	levelInt:=viper.GetInt("loglevel")
-	log.SetLevel(log.Level(levelInt))
-
+	// 解析配置文件
 	workDir, _ := os.Getwd()
 	config.InitConfig(workDir)
 	engine = db.GetDBEngine()
+
+	// 设置日志级别
+	isDebug := viper.GetBool("log.debug")
+	if isDebug {
+		log.SetLevel(log.DebugLevel)
+	} else {
+		log.SetLevel(log.InfoLevel)
+	}
 	flag.Parse()
 }
 
 func main() {
 	sT := time.Now()
 	contorller.DelURL(engine)
-	contorller.DeleteResult(engine)
 	defer engine.Close()
 
 	log.Info("开始垃圾回收")
-
-	utils.Get("")
 	contorller.CountAndGarbage()
+
+	isDeleteDB := viper.GetBool("garbage.deleteDB")
+	if isDeleteDB {
+		log.Info("开始删除数据库记录")
+		contorller.DeleteResult(engine)
+	} else {
+		log.Info("不删除数据库记录，已经删除指定时间区间的图片")
+	}
+
 	log.WithFields(log.Fields{
 		"cost ": time.Since(sT),
 	}).Info("共花费时间")

@@ -25,7 +25,12 @@ func QueryResult(table string, engine *xorm.Engine, q *entity.QueryTime) (imageU
 		Where("ts<?", q.EndTime).
 		Table(table).Iterate(new(entity.ImageURL), func(idx int, bean interface{}) error {
 		imageURL := bean.(*entity.ImageURL)
-		urls = append(urls, utils.ConverArceeURLToWeedUrl(imageURL.CutboardImageURI), utils.ConverArceeURLToWeedUrl(imageURL.ImageURI))
+		if imageURL.ImageURI != "" {
+			urls = append(urls, utils.ConverArceeURLToWeedUrl(imageURL.ImageURI))
+		}
+		if imageURL.CutboardImageURI != "" {
+			urls = append(urls, utils.ConverArceeURLToWeedUrl(imageURL.CutboardImageURI))
+		}
 		return nil
 	})
 	log.WithFields(log.Fields{"table": table, "num": len(urls)}).Info("the num of")

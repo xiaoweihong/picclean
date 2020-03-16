@@ -2,13 +2,14 @@ package utils
 
 import (
 	"bytes"
+	log "github.com/sirupsen/logrus"
 	"net/http"
 	"strings"
 )
 
 func ConverArceeURLToWeedUrl(url string) (resultUrl string) {
-
 	split := strings.Split(url, "v2")
+
 	if len(split) == 1 {
 		resultUrl = strings.Replace(url, "8501/api/file", "9333", -1)
 	} else {
@@ -23,9 +24,9 @@ func ConverArceeURLToWeedUrl(url string) (resultUrl string) {
 	}
 	resp, err := http.Head(resultUrl)
 	if err != nil {
-
+		log.WithFields(log.Fields{"url": resultUrl, "error": err}).Error("请求失败")
+		return resultUrl
 	}
 	resultUrl = resp.Request.URL.String()
 	return resultUrl
-
 }

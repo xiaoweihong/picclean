@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"strings"
 	"time"
 )
@@ -38,8 +37,7 @@ func timeParse() {
 }
 
 func main() {
-	s := log.Level(5)
-	log.SetLevel(log.DebugLevel)
-	fmt.Printf("%T\n", log.DebugLevel)
-	fmt.Println(s)
+   s:=""
+	split := strings.Split(s, "v1")
+	fmt.Println(split)
 }

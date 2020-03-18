@@ -16,13 +16,13 @@ var (
 	tables        []string
 	tablesNoIndex int
 	picCounts     int64
-	imageChan     = make(chan string, 1000)
+	imageChan     = make(chan string, viper.GetInt("garbage.maxChannel"))
 	tableCount    int
 )
 
 // QueryResult  根据时间区间(startTime,endTime)获取table的图片地址
 func QueryResult(table string, engine *xorm.Engine, q *entity.QueryTime) {
-	engine.
+	_ = engine.
 		Where("ts>?", q.StartTime).
 		Where("ts<?", q.EndTime).
 		Table(table).Iterate(new(entity.ImageURL), func(idx int, bean interface{}) error {

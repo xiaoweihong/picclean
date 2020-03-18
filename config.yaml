@@ -18,6 +18,7 @@ deletetime:
   # 删除结束时间
   endTime: "2020-03-11 11:30:00"
 garbage:
+  maxChannel: 1000
   URL: "127.0.0.1:9333"
   # seaweedfs回收阈值，越小回收的越快
   garbageThreshold: 0.2

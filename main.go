@@ -53,13 +53,7 @@ func main() {
 	log.Info("开始垃圾回收")
 	contorller.CountAndGarbage()
 
-	isDeleteDB := viper.GetBool("garbage.deleteDB")
-	if isDeleteDB {
-		log.Info("开始删除数据库记录")
-		contorller.DeleteResult(engine)
-	} else {
-		log.Info("不删除数据库记录，已经删除指定时间区间的图片")
-	}
+	contorller.DbDeleteResult(engine)
 
 	log.WithFields(log.Fields{
 		"cost ": time.Since(sT),

@@ -112,7 +112,7 @@ func Delete(url string, jwt string) error {
 	}
 	switch resp.StatusCode {
 	case http.StatusNotFound, http.StatusAccepted, http.StatusOK:
-		log.WithField("delete", url).Debug(string(body))
+		log.Debug(string(body))
 		return nil
 	}
 	m := make(map[string]interface{})

@@ -11,36 +11,36 @@ import (
 )
 
 var (
-	startTime int64
-	endTime   int64
-	tables    []string
-	picCounts int64
+	startTime     int64
+	endTime       int64
+	tables        []string
+	tablesNoIndex int
+	picCounts     int64
+	imageChan     = make(chan string, 1000)
+	tableCount    int
 )
 
 // QueryResult  根据时间区间(startTime,endTime)获取table的图片地址
-func QueryResult(table string, engine *xorm.Engine, q *entity.QueryTime) (imageUrls []string) {
-	var urls []string
+func QueryResult(table string, engine *xorm.Engine, q *entity.QueryTime) {
 	engine.
 		Where("ts>?", q.StartTime).
 		Where("ts<?", q.EndTime).
 		Table(table).Iterate(new(entity.ImageURL), func(idx int, bean interface{}) error {
 		imageURL := bean.(*entity.ImageURL)
-		if imageURL.ImageURI != "" {
-			urls = append(urls, utils.ConverArceeURLToWeedUrl(imageURL.ImageURI))
-		}
-		if imageURL.CutboardImageURI != "" {
-			urls = append(urls, utils.ConverArceeURLToWeedUrl(imageURL.CutboardImageURI))
+		if imageURL.ImageURI != "" || imageURL.CutboardImageURI != "" {
+			imageChan <- utils.ConverArceeURLToWeedUrl(imageURL.ImageURI)
+			imageChan <- utils.ConverArceeURLToWeedUrl(imageURL.CutboardImageURI)
 		}
 		return nil
 	})
-	log.WithFields(log.Fields{"table": table, "num": len(urls)}).Info("the num of")
-
-	return urls
+	tableCount++
+	if tableCount == tablesNoIndex {
+		close(imageChan)
+	}
 }
 
 // GetAllResult 获得所有表中的图片url数据切片
-func GetAllResult(engine *xorm.Engine) (imageUrls []string) {
-	var allResultSlice []string
+func GetAllResult(engine *xorm.Engine) {
 	startTime = utils.ParseTimeToTimeStamp(viper.GetString("deletetime.startTime"))
 	endTime = utils.ParseTimeToTimeStamp(viper.GetString("deletetime.endTime"))
 	tables = viper.GetStringSlice("postgres.tables")
@@ -51,12 +51,11 @@ func GetAllResult(engine *xorm.Engine) (imageUrls []string) {
 
 	for _, table := range tables {
 		if !strings.Contains(table, "_index") {
-			imageUrls = QueryResult(table, engine, queryTime)
-			allResultSlice = append(allResultSlice, imageUrls...)
+			tablesNoIndex++
+			go QueryResult(table, engine, queryTime)
 		}
 	}
 	//log.WithFields(log.Fields{"toal": len(allResultSlice)}).Info(allResultSlice)
-	return allResultSlice
 }
 
 // DeleteResultFromDB 根据时间区间(startTime,endTime)删除table的记录
@@ -90,26 +89,22 @@ func DeleteResult(engine *xorm.Engine) {
 }
 
 // DeleteUrl 根据weed的api删除图片
-func DeleteUrlFromWeed(urls []string, flag chan bool) {
-	for _, url := range urls {
-		err := utils.Delete(url, "")
-		if err != nil {
-			fmt.Println(err)
-		}
-		//log.WithFields(log.Fields{}).Debug(url)
+func DeleteUrlFromWeed(url string) {
+	err := utils.Delete(url, "")
+	if err != nil {
+		fmt.Println(err)
 	}
-	flag <- true
 }
 
 // 删除图片
 func DelURL(engine *xorm.Engine) {
-	resultUrls := GetAllResult(engine)
-	picCounts = int64(len(resultUrls))
-	ww := make(chan bool)
-	go DeleteUrlFromWeed(resultUrls[:len(resultUrls)/2], ww)
-	go DeleteUrlFromWeed(resultUrls[len(resultUrls)/2:], ww)
-	<-ww
-	<-ww
+	GetAllResult(engine)
+	for img := range imageChan {
+		log.Debug("delete URL-->", img)
+		DeleteUrlFromWeed(img)
+		picCounts++
+	}
+	log.Info("")
 }
 
 func CountAndGarbage() {

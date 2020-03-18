@@ -36,8 +36,12 @@ func timeParse() {
 	fmt.Println(parse.Unix())
 }
 
+func Timeparse(timeint int64) {
+	a := time.Unix(timeint, 0)
+	format := a.Format("2006-01-02 15:04:05")
+	fmt.Println(format)
+}
+
 func main() {
-   s:=""
-	split := strings.Split(s, "v1")
-	fmt.Println(split)
+	Timeparse(1609385400)
 }

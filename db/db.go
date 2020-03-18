@@ -3,7 +3,7 @@ package db
 import (
 	"fmt"
 	"github.com/go-xorm/xorm"
-	"github.com/golang/glog"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
@@ -25,7 +25,7 @@ func GetDBEngine() *xorm.Engine {
 		host, port, user, password, dbname)
 	engine, err := xorm.NewEngine("postgres", psqlInfo)
 	if err != nil {
-		glog.Fatal(err)
+		log.Fatal(err)
 		return nil
 	}
 	engine.ShowSQL(showsql) //菜鸟必备
@@ -36,7 +36,7 @@ func GetDBEngine() *xorm.Engine {
 
 	err = engine.Ping()
 	if err != nil {
-		glog.Fatal(err)
+		log.Fatal(err)
 		return nil
 	}
 	return engine

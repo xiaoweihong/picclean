@@ -16,14 +16,15 @@ deletetime:
   # 删除开始时间，一般不需要修改
   startTime: "2006-01-02 15:04:05"
   # 删除结束时间
-  endTime: "2020-03-11 11:30:00"
+  endTime: "2021-03-11 11:30:00"
 garbage:
+  parallelNum: 500
   maxChannel: 1000
   URL: "127.0.0.1:9333"
   # seaweedfs回收阈值，越小回收的越快
   garbageThreshold: 0.2
   # 是否删除数据库记录 false 不删除  true 删除
-  deleteDB: true
+  deleteDB: false
 log:
   # false为info级别 true为debug级别
   debug: true

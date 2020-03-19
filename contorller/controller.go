@@ -8,6 +8,7 @@ import (
 	"picclean/entity"
 	"picclean/utils"
 	"strings"
+	"sync"
 )
 
 var (
@@ -18,6 +19,7 @@ var (
 	picCounts     int64
 	imageChan     = make(chan string, viper.GetInt("garbage.maxChannel"))
 	tableCount    int
+	wg            sync.WaitGroup
 )
 
 // QueryResult  根据时间区间(startTime,endTime)获取table的图片地址
@@ -89,22 +91,27 @@ func DeleteResult(engine *xorm.Engine) {
 }
 
 // DeleteUrl 根据weed的api删除图片
-func DeleteUrlFromWeed(url string) {
-	err := utils.Delete(url, "")
-	if err != nil {
-		fmt.Println(err)
+func DeleteUrlFromWeed() {
+	for img := range imageChan {
+		log.Debug("delete URL-->", img)
+		err := utils.Delete(img, "")
+		if err != nil {
+			fmt.Println(err)
+		}
+		picCounts++
 	}
+	wg.Done()
 }
 
 // 删除图片
 func DelURL(engine *xorm.Engine) {
 	GetAllResult(engine)
-	for img := range imageChan {
-		log.Debug("delete URL-->", img)
-		DeleteUrlFromWeed(img)
-		picCounts++
+	parallelNum := viper.GetInt("garbage.parallelNum")
+	for i := 0; i < parallelNum; i++ {
+		wg.Add(1)
+		DeleteUrlFromWeed()
 	}
-	log.Info("")
+	wg.Wait()
 }
 
 func CountAndGarbage() {

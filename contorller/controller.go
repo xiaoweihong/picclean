@@ -3,6 +3,7 @@ package contorller
 import (
 	"fmt"
 	"github.com/go-xorm/xorm"
+	"github.com/panjf2000/ants/v2"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"picclean/entity"
@@ -100,16 +101,21 @@ func DeleteUrlFromWeed() {
 		}
 		picCounts++
 	}
-	wg.Done()
 }
 
 // 删除图片
 func DelURL(engine *xorm.Engine) {
 	GetAllResult(engine)
 	parallelNum := viper.GetInt("garbage.parallelNum")
+	p, _ := ants.NewPoolWithFunc(10, func(i interface{}) {
+		DeleteUrlFromWeed()
+		wg.Done()
+	})
+	defer p.Release()
 	for i := 0; i < parallelNum; i++ {
 		wg.Add(1)
-		DeleteUrlFromWeed()
+		p.Invoke(i)
+
 	}
 	wg.Wait()
 }
